@@ -123,6 +123,7 @@ class TimeBooking < ActiveRecord::Base
       end
     end
     # workaround to get dirty-flag working even for associated fields!
+    @changed_attributes ||= {}
     @changed_attributes['issue'] = self.issue unless issue == self.issue
     self.time_entry.update_attributes! :issue => issue #also update TimeEntry
   end
@@ -157,6 +158,7 @@ class TimeBooking < ActiveRecord::Base
 
     # workaround to get dirty-flag working even for associated fields!
     unless project.id == self.project_id
+      @changed_attributes ||= {}
       if self.project.nil?
         @changed_attributes['project_id'] = nil
       else
@@ -188,6 +190,7 @@ class TimeBooking < ActiveRecord::Base
 
   def activity_id=(activity_id)
     # workaround to get dirty-flag working even for associated fields!
+    @changed_attributes ||= {}
     @changed_attributes['activity_id'] = self.activity_id unless activity_id == self.activity_id
     self.time_entry.update_attributes! :activity_id => activity_id
   end
