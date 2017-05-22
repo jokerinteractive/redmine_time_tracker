@@ -47,6 +47,7 @@ matrix:
 
 before_install:
 - . .travis/clone_redmine.sh
+- gem install bundler
 
 gemfile: test_redmine/Gemfile
 install:
