@@ -2,9 +2,9 @@
 [![Code Climate](https://codeclimate.com/github/hicknhack-software/redmine_time_tracker.png)](https://codeclimate.com/github/hicknhack-software/redmine_time_tracker)
 [![Build Status](https://travis-ci.org/hicknhack-software/redmine_time_tracker.png?branch=master)](https://travis-ci.org/hicknhack-software/redmine_time_tracker)
 
-# Redmine Time Tracker plugin
+# [Unmaintained] Redmine Time Tracker plugin
 
-__Note: This project will be deprecated in favor of a complete rewrite available here: [Redmine Hourglass](https://github.com/hicknhack-software/redmine_hourglass). It's close to be released and when it arrives, we will no longer continue working on this version.__
+__Note: This project is no longer maintained by us in favor of a complete rewrite available here: [Redmine Hourglass](https://github.com/hicknhack-software/redmine_hourglass). Please don't open issues or submit pull requests anymore.__
 
 Time tracker is a Redmine plugin to ease time tracking when working on an issue.
 The plugin allows to start/stop a timer on a per user basis. The timer can be started with or without any reference to a Redmine Issue.
