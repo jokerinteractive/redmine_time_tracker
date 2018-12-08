@@ -1,11 +1,11 @@
 require 'redmine/i18n'
 class TimeBooking < ActiveRecord::Base
   include Redmine::I18n
-  unloadable
 
-  attr_accessible :started_on, :stopped_at, :time_entry_id, :time_log_id, :project, :project_id
+  attr_accessible :started_on, :stopped_at, :time_entry_id, :time_log_id, :project, :project_id, :comments, :issue, :activity_id
   belongs_to :project
   belongs_to :time_log
+  has_one :user, through: :time_log
   belongs_to :time_entry, :dependent => :delete
   has_one :issue, :through => :time_entry
   has_one :activity, :through => :time_entry
@@ -22,8 +22,15 @@ class TimeBooking < ActiveRecord::Base
     }
     cond = [ca.map { |c| c[0] }.join(" OR ")]
 
-    {:include => :project,
-     :conditions => cond}
+    joins(:project).where(cond)
+  }
+
+  scope :from_time_log, lambda { |time_log_id|
+    where(time_log_id: time_log_id)
+  }
+
+  scope :overlaps_with, lambda { |start_time, stop_time|
+    where(arel_table[:started_on].lt(stop_time).and(arel_table[:stopped_at].gt(start_time)))
   }
 
   # check user-permissions. in some cass we need to prevent some or all of his actions
@@ -116,6 +123,7 @@ class TimeBooking < ActiveRecord::Base
       end
     end
     # workaround to get dirty-flag working even for associated fields!
+    @changed_attributes ||= {}
     @changed_attributes['issue'] = self.issue unless issue == self.issue
     self.time_entry.update_attributes! :issue => issue #also update TimeEntry
   end
@@ -150,6 +158,7 @@ class TimeBooking < ActiveRecord::Base
 
     # workaround to get dirty-flag working even for associated fields!
     unless project.id == self.project_id
+      @changed_attributes ||= {}
       if self.project.nil?
         @changed_attributes['project_id'] = nil
       else
@@ -181,6 +190,7 @@ class TimeBooking < ActiveRecord::Base
 
   def activity_id=(activity_id)
     # workaround to get dirty-flag working even for associated fields!
+    @changed_attributes ||= {}
     @changed_attributes['activity_id'] = self.activity_id unless activity_id == self.activity_id
     self.time_entry.update_attributes! :activity_id => activity_id
   end
@@ -194,6 +204,7 @@ class TimeBooking < ActiveRecord::Base
 
   def comments=(comments)
     # workaround to get dirty-flag working even for associated fields!
+    @changed_attributes ||= {}
     @changed_attributes['comments'] = self.comments unless comments == self.comments
     self.time_entry.update_attributes! :comments => comments
   end

@@ -1,5 +1,4 @@
 class TtBookingsListController < ApplicationController
-  unloadable
 
   menu_item :time_tracker_menu_tab_bookings_list
   before_filter :authorize_global, :check_settings_for_ajax
@@ -29,7 +28,7 @@ class TtBookingsListController < ApplicationController
     if @query_bookings.valid?
       @limit = per_page_option
 
-      @booking_count = @query_bookings.booking_count
+      @booking_count = @query_bookings.bookings.count
       @booking_pages = Paginator.new @booking_count, @limit, params['page'], 'page'
       @offset ||= @booking_pages.offset
       @bookings = @query_bookings.bookings(:order => sort_bookings_clause,

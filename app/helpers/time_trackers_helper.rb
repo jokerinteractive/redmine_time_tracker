@@ -17,6 +17,10 @@ module TimeTrackersHelper
     Enumeration.find(activity_id)
   end
 
+  def shared_activities
+    TimeEntryActivity.shared.all
+  end
+
   def get_activities(project_id)
     if project_id.blank?
       TimeEntryActivity.shared.active.all
@@ -155,16 +159,19 @@ module TimeTrackersHelper
 
   def query_from_id
     unless params[:query_id].blank?
-      query = Query.find(params[:query_id], :conditions => "project_id IS NULL")
+      query = Query.find(params[:query_id])
       raise ::Unauthorized unless query.visible?
       sess_info = {:filters => query.filters, :group_by => query.group_by, :column_names => query.column_names}
-      case query.class.queried_class.name
-        when 'TimeLog'
+      case query.class.name
+        when 'TimeLogQuery'
           session[:tt_user_logs_query] = sess_info
           @query_logs = query.clone
-        when 'TimeBooking'
+        when 'TimeBookingQuery'
           session[:tt_user_bookings_query] = sess_info
           @query_bookings = query.clone
+        when 'ReportQuery'
+          session[:tt_user_reports_query] = sess_info
+          @query_reports = query.clone
       end
       sort_clear
     end
@@ -190,5 +197,16 @@ module TimeTrackersHelper
     else
       TimeBookingQuery.find_by_id(session[:tt_user_bookings_query][:id]) if session[:tt_user_bookings_query][:id]
     end || TimeBookingQuery.new(:name => 'x', :filters => session[:tt_user_bookings_query][:filters] || {}, :group_by => session[:tt_user_bookings_query][:group_by], :column_names => session[:tt_user_bookings_query][:column_names])
+  end
+
+  def reports_query
+    @query_reports ||= if params[:set_filter] == '3' || session[:tt_user_reports_query].nil?
+      query = ReportQuery.new :name => 'x', :filters => {}
+      query.build_from_params(params)
+      session[:tt_user_reports_query] = {:filters => query.filters, :group_by => query.group_by, :column_names => query.column_names}
+      query.clone
+    else
+      ReportQuery.find_by_id(session[:tt_user_reports_query][:id]) if session[:tt_user_reports_query][:id]
+    end || ReportQuery.new(:name => 'x', :filters => session[:tt_user_reports_query][:filters] || {}, :group_by => session[:tt_user_reports_query][:group_by], :column_names => session[:tt_user_reports_query][:column_names])
   end
 end
