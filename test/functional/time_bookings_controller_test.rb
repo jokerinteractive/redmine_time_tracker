@@ -1,4 +1,5 @@
-require_relative '../test_helper'
+require File.dirname(__FILE__) + '../../minitest_helper'
+
 
 class TimeBookingsControllerTest < ActionController::TestCase
   fixtures :projects, :users, :user_preferences, :roles, :members, :member_roles, :issues, :trackers, :issue_statuses, :enabled_modules,
@@ -12,6 +13,10 @@ class TimeBookingsControllerTest < ActionController::TestCase
     @request.session[:user_id] = nil
     Setting.default_language = 'en'
     Setting.date_format = '%Y-%m-%d'
+
+    # Quick fix for Redmine > 3.0 so the tests do not need to send an XHR request when the response will be
+    # JavaScript
+    subject.class.skip_before_filter :verify_authenticity_token
   end
 
   # test_permissions
@@ -157,8 +162,8 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_error_not_allowed_to_change_booking), flash[:error], "show error-message")
         tb = TimeBooking.where(:id => 1).first
-        assert_equal("23:47", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+
+        assert_equal(local_datetime('2012-10-25 23:47:00'), tb.started_on, "not updated TB datetime")
       end
 
       should "not update TB -comments/issue/activity or project on foreign bookings" do
@@ -180,8 +185,8 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_error_not_allowed_to_change_foreign_booking), flash[:error], "show error-message")
         tb = TimeBooking.where(:id => 2).first
-        assert_equal("08:47", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        
+        assert_equal(local_datetime("2012-10-25 08:47:00"), tb.started_on, "not updated TB-datetime")
       end
     end
 
@@ -221,8 +226,7 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_update_booking_success), flash[:notice] || flash[:error], "show flash-message")
         tb = TimeBooking.where(:id => 1).first
-        assert_equal("23:48", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        assert_equal(local_datetime("2012-10-25 23:48:00"), tb.started_on, "not updated TB-datetime")
       end
 
       should "not update TB -comments/issue/activity or project on foreign bookings" do
@@ -244,8 +248,7 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_error_not_allowed_to_change_foreign_booking), flash[:error], "show error-message")
         tb = TimeBooking.where(:id => 2).first
-        assert_equal("08:47", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        assert_equal(local_datetime("2012-10-25 08:47:00"), tb.started_on, "not updated TB-datetime")
       end
     end
 
@@ -285,8 +288,7 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_update_booking_success), flash[:notice] || flash[:error], "show flash-message")
         tb = TimeBooking.where(:id => 1).first
-        assert_equal("23:48", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        assert_equal(local_datetime("2012-10-25 23:48:00"), tb.started_on, "not updated TB-datetime")
       end
 
       should "update TB -comments/issue/activity and project on foreign bookings" do
@@ -308,8 +310,7 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_update_booking_success), flash[:notice] || flash[:error], "show flash-message")
         tb = TimeBooking.where(:id => 2).first
-        assert_equal("08:48", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        assert_equal(local_datetime("2012-10-25 8:48:00"), tb.started_on, "not updated TB-date")
       end
     end
 
@@ -333,8 +334,7 @@ class TimeBookingsControllerTest < ActionController::TestCase
         assert_response 302, "on update TB"
         assert_equal(I18n.t(:tt_update_booking_success), flash[:notice] || flash[:error], "show flash-message")
         tb = TimeBooking.where(:id => 1).first
-        assert_equal("23:48", tb.started_on.to_time.localtime.strftime("%H:%M"), "not updated TB-time")
-        assert_equal("2012-10-25", tb.started_on.to_date.to_s(:db), "not updated TB-date")
+        assert_equal(local_datetime("2012-10-25 21:48:00"), tb.started_on, "not updated TB-date")
       end
     end
   end
